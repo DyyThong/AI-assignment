@@ -1,6 +1,10 @@
 import sys, pygame
 from pygame import display
 
+def solveHeuristic():
+    pass
+
+
 # Initialize the pygame
 pygame.init()
 

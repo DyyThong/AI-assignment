@@ -2,6 +2,7 @@ import sys, pygame
 from pygame import display
 
 #https://baldur.iti.kit.edu/theses/SokobanPortfolio.pdf
+#https://verificationglasses.wordpress.com/2021/01/17/a-star-sokoban-planning/
 
 WALLS = [[0, 1, 0, 1, 0, 0],
          [0, 1, 0, 1, 1, 1],
@@ -12,6 +13,11 @@ WALLS = [[0, 1, 0, 1, 0, 0],
 PLAYER = (3, 3)
 BOXES = [(2, 2), (2, 4), (3, 2), (4, 3)]
 GOALS = [(0, 2), (2, 5), (3, 0), (5, 3)]
+
+class State:
+    def __init__(self, boxes):
+        self.boxes = boxes
+
 
 
 def isStuck(box):
@@ -35,10 +41,15 @@ def isStuckState(state):
     # Test if a state is unsolvable
     # If one box is stuck, and it is not at a goal, then we can't move it anymore
     # Therefore it's impossible to reach the goal from that state
-    for box in BOXES:
+    for box in state.boxes:
         if isStuck(box) and (box not in GOALS):
             return True
     return False
+
+def isWinning(state):
+    #Check if all the boxes are at the goals
+    return set(state.boxes) == set(GOALS)
+
 
 def solveHeuristic():
     pass

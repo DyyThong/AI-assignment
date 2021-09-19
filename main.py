@@ -1,24 +1,70 @@
-import sys, pygame
-from pygame import display
+#import sys, pygame
+#from pygame import display
 import queue
+import sys
+import time
+import datetime
 
 #https://baldur.iti.kit.edu/theses/SokobanPortfolio.pdf
 #https://verificationglasses.wordpress.com/2021/01/17/a-star-sokoban-planning/
 #https://home.cse.ust.hk/~yqsong/teaching/comp3211/projects/2017Fall/G14.pdf
 
-WALLS = [[0, 1, 0, 1, 0, 0],
-         [0, 1, 0, 1, 1, 1],
-         [1, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 1, 1],
-         [1, 1, 1, 0, 1, 0],
-         [0, 0, 1, 0, 1, 0]]
-PLAYER = (3, 3)
-BOXES = [(2, 2), (2, 4), (3, 2), (4, 3)]
-GOALS = [(0, 2), (2, 5), (3, 0), (5, 3)]
+WALLS = []
+PLAYER = ()
+BOXES = []
+GOALS = []
+
+#number of states created and visited
+STATECREATED = 0
+STATEVISITED = 0
+
+#Create level information from text file
+def parseLevel(filename):
+    '''Notation:
+        - @: agent
+        - #: wall
+        - $: box
+        - .: destination
+        - *: box on destination
+        - +: agent on destination
+    '''
+    global WALLS
+    global PLAYER
+    global BOXES
+    global GOALS
+
+    with open(filename, "r") as f:
+        level = f.read().split("\n")
+    for x in range(len(level)):
+        wall = []
+        for y in range(len(level[x])):
+            char = level[x][y]
+            if (char == "@"):
+                wall.append(0)
+                PLAYER = (x,y)
+            elif (char == "#"):
+                wall.append(1)
+            elif (char == "$"):
+                wall.append(0)
+                BOXES.append((x,y))
+            elif (char == "."):
+                wall.append(0)
+                GOALS.append((x,y))
+            elif (char == "*"):
+                wall.append(0)
+                BOXES.append((x,y))
+                GOALS.append((x,y))
+            elif (char == "+"):
+                wall.append(0)
+                GOALS.append((x,y))
+                PLAYER = (x,y)
+            else:
+                wall.append(0)
+        WALLS.append(wall)
 
 class State:
     def __init__(self, boxes, player, cost, prevState):
-        self.boxes = boxes
+        self.boxes = boxes.copy()
         self.player = player
         self.cost = cost    #The number of moves it take to get to the current state
         self.priority = self.calPriority()
@@ -44,7 +90,6 @@ class State:
             priority += minDis
         return priority
 
-
 #Calculating the manhattan distance between 2 points
 def calManhattan(pointA, pointB):
     (xA, yA) = pointA
@@ -61,7 +106,7 @@ def isStuck(box):
     else:
         isStuckVertical = 1
     #If there is wall on the left or right to the block, we can't move it horizontally
-    if (y > 0 and y < len(WALLS) - 1):
+    if (y > 0 and y < len(WALLS[x]) - 1):
         isStuckHorizontal = WALLS[x][y - 1] or WALLS[x][y + 1]
     else:
         isStuckHorizontal = 1
@@ -124,13 +169,19 @@ def handleMoves(state, action):
         elif (xBox, yBox) in state.boxes:
             return None
         else:
-            newBoxes = state.boxes
+            #Note to self:if we dont use copy(), the new name will just be an alias of the old object
+            newBoxes = state.boxes.copy()
             newBoxes.remove((xNext, yNext))
             newBoxes.append((xBox, yBox))
             return State(newBoxes, (xNext, yNext), state.cost + 1, state)
 
-
+#Heuristic solver using A* algorithm
 def solveHeuristic():
+    global STATEVISITED
+    global STATECREATED
+
+    STATECREATED = 1
+    STATEVISITED = 0
     initState = State(BOXES, PLAYER, 0, None)
     moves = ["UP", "DOWN", "LEFT", "RIGHT"]
     pq = queue.PriorityQueue()
@@ -138,6 +189,7 @@ def solveHeuristic():
     visited = []
     while not pq.empty():
         current = pq.get()
+        STATEVISITED += 1
         if (isWinning(current)):
             return current
         visited.append((current.boxes, current.player))
@@ -146,13 +198,22 @@ def solveHeuristic():
             if (state == None):     #Invalid move
                 continue
             elif (isStuckState(state)):  #Ignore the stuck states
+                STATECREATED += 1
                 continue
             elif ((state.boxes, state.player) in visited):  #Ignore the visted states
+                STATECREATED += 1
                 continue
             else:
+                STATECREATED += 1
                 pq.put(state)
     return None
 
+def printPath(finalState):
+    state = finalState
+    while (state != None):
+        print(state)
+        print("___________________________________________")
+        state = state.prevState
 
 # Initialize the pygame
 #pygame.init()
@@ -163,4 +224,19 @@ def solveHeuristic():
 #while True:
 #    pass
 
-print(solveHeuristic())
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python main.py <filename>")
+        exit(1)
+
+    parseLevel(sys.argv[1])
+    start = time.time()
+    path = solveHeuristic()
+    end = time.time()
+    print("Time elapsed: " + str(datetime.timedelta(seconds=end - start)))
+    print("State created: " + str(STATECREATED))
+    print("State visited: "+ str(STATEVISITED))
+    printPath(path)
+
+#solveHeuristic()

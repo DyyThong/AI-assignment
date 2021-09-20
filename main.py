@@ -13,6 +13,7 @@ WALLS = []
 PLAYER = ()
 BOXES = []
 GOALS = []
+STUCK = []
 
 #number of states created and visited
 STATECREATED = 0
@@ -34,7 +35,7 @@ def parseLevel(filename):
     global GOALS
 
     with open(filename, "r") as f:
-        level = f.read().split("\n")
+        level = f.read().strip("\n").split("\n")
     for x in range(len(level)):
         wall = []
         for y in range(len(level[x])):
@@ -58,9 +59,55 @@ def parseLevel(filename):
                 wall.append(0)
                 GOALS.append((x,y))
                 PLAYER = (x,y)
-            else:
+            elif (char == " "):
                 wall.append(0)
         WALLS.append(wall)
+
+#Mark the cells where a box can't reach a goal (I call them stuck cells)
+def getDeadlocks():
+    global STUCK
+    #First, assume that all cells are stuck cell
+    STUCK = [(x,y) for x in range(len(WALLS)) for y in range(len(WALLS[x]))]
+
+    #For each goal, we place a box there and try to PULL it across the map
+    #If we can reach a cell by pulling, it also means that we can push a block at that cell to the goal.
+    #So we'll remove that cell from the stuck list
+    for goal in GOALS:
+        q = queue.Queue()
+        if goal not in STUCK:
+            continue
+        q.put(goal)
+
+        '''We can perform a pull if:
+            - The box doesn't move to a wall
+            - The agent doesn't move to a wall
+        '''
+        while not q.empty():
+            (x,y) = q.get()
+
+            if (x,y) not in STUCK:
+                continue
+
+            STUCK.remove((x,y))
+            #Try to pull a block upward
+            if (x - 2 >= 0 and (x - 1, y) in STUCK):
+                if WALLS[x-1][y] != 1 and WALLS[x-2][y] != 1:
+                    q.put((x - 1, y))
+            #Try to pull a block downward
+            if (x + 2 < len(WALLS) and (x + 1, y) in STUCK):
+                if  WALLS[x+1][y] != 1 and WALLS[x+2][y] != 1:
+                    q.put((x + 1, y))
+            #Try to pull a block to the left
+            if (y - 2 >= 0 and (x, y - 1) in STUCK):
+                if WALLS[x][y-1] != 1 and WALLS[x][y - 2] != 1:
+                    q.put((x, y - 1))
+            #Try to pull a block to the right
+            if (y + 2 < len(WALLS[x]) and (x, y + 1) in STUCK):
+                if WALLS[x][y + 1] != 1 and WALLS[x][y + 2] != 1:
+                    q.put((x, y + 1))
+
+    #Remove the walls from the final list
+    STUCK = [cell for cell in STUCK if WALLS[cell[0]][cell[1]] == 0]
 
 class State:
     def __init__(self, boxes, player, cost, prevState):
@@ -96,34 +143,15 @@ def calManhattan(pointA, pointB):
     (xB, yB) = pointB
     return abs(xA - xB) + abs(yA - yB)
 
-def isStuck(box):
-    #Test if a box is stuck
-    #A box is considered stuck if we can't move it vertically or horizontally
-    (x,y) = box
-    #If there is wall up or below the block, we can't move it vertically
-    if (x > 0 and x < len(WALLS) - 1):
-        isStuckVertical = WALLS[x-1][y] or WALLS[x + 1][y]
-    else:
-        isStuckVertical = 1
-    #If there is wall on the left or right to the block, we can't move it horizontally
-    if (y > 0 and y < len(WALLS[x]) - 1):
-        isStuckHorizontal = WALLS[x][y - 1] or WALLS[x][y + 1]
-    else:
-        isStuckHorizontal = 1
-    return isStuckHorizontal and isStuckVertical
-
-def isStuckState(state):
-    # Test if a state is unsolvable
-    # If one box is stuck, and it is not at a goal, then we can't move it anymore
-    # Therefore it's impossible to reach the goal from that state
-    for box in state.boxes:
-        if isStuck(box) and (box not in GOALS):
-            return True
-    return False
-
 def isWinning(state):
     #Check if all the boxes are at the goals
     return set(state.boxes) == set(GOALS)
+
+def isStuckState(boxes):
+    for box in boxes:
+        if box in STUCK:
+            return True
+    return False
 
 #Trasition from one state to the next
 def handleMoves(state, action):
@@ -168,6 +196,9 @@ def handleMoves(state, action):
         #Cant move if the block hits another block
         elif (xBox, yBox) in state.boxes:
             return None
+        #Discard state if a box move to a stuck cell
+        elif (xBox, yBox) in STUCK:
+            return None
         else:
             #Note to self:if we dont use copy(), the new name will just be an alias of the old object
             newBoxes = state.boxes.copy()
@@ -177,12 +208,16 @@ def handleMoves(state, action):
 
 #Heuristic solver using A* algorithm
 def solveHeuristic():
+    getDeadlocks()
     global STATEVISITED
     global STATECREATED
 
     STATECREATED = 1
     STATEVISITED = 0
     initState = State(BOXES, PLAYER, 0, None)
+    if isStuckState(initState.boxes):
+        return None
+
     moves = ["UP", "DOWN", "LEFT", "RIGHT"]
     pq = queue.PriorityQueue()
     pq.put(initState)
@@ -192,15 +227,12 @@ def solveHeuristic():
         STATEVISITED += 1
         if (isWinning(current)):
             return current
-        visited.append((current.boxes, current.player))
+        visited.append((set(current.boxes), current.player))
         neighbors = [handleMoves(current, move) for move in moves]
         for state in neighbors:
             if (state == None):     #Invalid move
                 continue
-            elif (isStuckState(state)):  #Ignore the stuck states
-                STATECREATED += 1
-                continue
-            elif ((state.boxes, state.player) in visited):  #Ignore the visted states
+            elif ((set(state.boxes), state.player) in visited):  #Ignore the visted states
                 STATECREATED += 1
                 continue
             else:
@@ -237,6 +269,11 @@ if __name__ == "__main__":
     print("Time elapsed: " + str(datetime.timedelta(seconds=end - start)))
     print("State created: " + str(STATECREATED))
     print("State visited: "+ str(STATEVISITED))
-    printPath(path)
+    print("Cost: " + str(path.cost))
+
+    #
+    #print(STUCK)
+
+    #printPath(path)
 
 #solveHeuristic()

@@ -158,6 +158,7 @@ def handleMoves(state, action):
     #xNext and yNext are the position of the player after the move
     #xBox and yBox are the position of the boxes after the move,
     #assume that we hit a block and move it in that direction
+    global STATECREATED
     (xPlayer, yPlayer) = state.player
     if action == "UP":
         (xNext, yNext) = (xPlayer - 1, yPlayer)
@@ -184,6 +185,7 @@ def handleMoves(state, action):
 
     #If we dont hit any boxes, move to a new state
     if (xNext, yNext) not in state.boxes:
+        STATECREATED += 1
         return State(state.boxes, (xNext, yNext), state.cost + 1, state)
     else:
         #Cant move if the block hits a wall go goes out of bound
@@ -204,6 +206,7 @@ def handleMoves(state, action):
             newBoxes = state.boxes.copy()
             newBoxes.remove((xNext, yNext))
             newBoxes.append((xBox, yBox))
+            STATECREATED += 1
             return State(newBoxes, (xNext, yNext), state.cost + 1, state)
 
 #Heuristic solver using A* algorithm
@@ -212,9 +215,9 @@ def solveHeuristic():
     global STATEVISITED
     global STATECREATED
 
-    STATECREATED = 1
-    STATEVISITED = 0
     initState = State(BOXES, PLAYER, 0, None)
+    STATECREATED = 1
+    STATEVISITED = 1
     if isStuckState(initState.boxes):
         return None
 
@@ -222,21 +225,20 @@ def solveHeuristic():
     pq = queue.PriorityQueue()
     pq.put(initState)
     visited = []
+    visited.append((set(initState.boxes), initState.player))
     while not pq.empty():
         current = pq.get()
         STATEVISITED += 1
         if (isWinning(current)):
             return current
-        visited.append((set(current.boxes), current.player))
         neighbors = [handleMoves(current, move) for move in moves]
         for state in neighbors:
             if (state == None):     #Invalid move
                 continue
             elif ((set(state.boxes), state.player) in visited):  #Ignore the visted states
-                STATECREATED += 1
                 continue
             else:
-                STATECREATED += 1
+                visited.append((set(state.boxes), state.player))
                 pq.put(state)
     return None
 
@@ -271,9 +273,5 @@ if __name__ == "__main__":
     print("State visited: "+ str(STATEVISITED))
     print("Cost: " + str(path.cost))
 
-    #
-    #print(STUCK)
-
-    #printPath(path)
 
 #solveHeuristic()

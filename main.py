@@ -130,11 +130,14 @@ class State:
 
     #calculating the prority value of a state
     #priority value is determined by the total manhattan distance of every boxes to its nearest goals
+    #plus the distance from the player to his nearest box
     def calPriority(self):
         priority = 0
         for box in self.boxes:
             minDis = min([calManhattan(box, goal) for goal in GOALS])
             priority += minDis
+        closetBoxToPlayer = min([calManhattan(box, self.player) for box in self.boxes])
+        priority = priority + 0.5 * closetBoxToPlayer
         return priority
 
 #Calculating the manhattan distance between 2 points

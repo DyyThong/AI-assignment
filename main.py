@@ -213,7 +213,7 @@ def handleMoves(state, action):
             return State(newBoxes, (xNext, yNext), state.cost + 1, state)
 
 #Heuristic solver using A* algorithm
-def solveHeuristic():
+def solve(pq):
     getDeadlocks()
     global STATEVISITED
     global STATECREATED
@@ -225,7 +225,7 @@ def solveHeuristic():
         return None
 
     moves = ["UP", "DOWN", "LEFT", "RIGHT"]
-    pq = queue.PriorityQueue()
+    #pq = queue.PriorityQueue()
     pq.put(initState)
     visited = []
     visited.append((set(initState.boxes), initState.player))
@@ -244,6 +244,11 @@ def solveHeuristic():
                 visited.append((set(state.boxes), state.player))
                 pq.put(state)
     return None
+
+def solveHeuristic():
+    return solve(queue.PriorityQueue())
+def solverBlind():
+    return solve(queue.Queue())
 
 def printPath(finalState):
     state = finalState

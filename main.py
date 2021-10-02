@@ -200,12 +200,13 @@ def runLevel(levels, levelNum):
         if playerMoveTo != None and not levelIsComplete:
             # If the player pushed a key to move, make the move
             # (if possible) and push any stars that are pushable.
-            moved = makeMove(mapObj, gameStateObj, playerMoveTo)
+            
+            #moved = makeMove(mapObj, gameStateObj, playerMoveTo)
 
-            if moved:
-                # increment the step counter.
-                gameStateObj['stepCounter'] += 1
-                mapNeedsRedraw = True
+            # if moved:
+            #     # increment the step counter.
+            #     gameStateObj['stepCounter'] += 1
+            #     mapNeedsRedraw = True
 
             if isLevelFinished(levelObj, gameStateObj):
                 # level is solved, we should show the "Solved!" image.
@@ -320,51 +321,51 @@ def isBlocked(mapObj, gameStateObj, x, y):
     return False
 
 
-def makeMove(mapObj, gameStateObj, playerMoveTo):
-    """Given a map and game state object, see if it is possible for the
-    player to make the given move. If it is, then change the player's
-    position (and the position of any pushed star). If not, do nothing.
+# def makeMove(mapObj, gameStateObj, playerMoveTo):
+#     """Given a map and game state object, see if it is possible for the
+#     player to make the given move. If it is, then change the player's
+#     position (and the position of any pushed star). If not, do nothing.
 
-    Returns True if the player moved, otherwise False."""
+#     Returns True if the player moved, otherwise False."""
 
-    # Make sure the player can move in the direction they want.
-    playerx, playery = gameStateObj['player']
+#     # Make sure the player can move in the direction they want.
+#     playerx, playery = gameStateObj['player']
 
-    # This variable is "syntactic sugar". Typing "stars" is more
-    # readable than typing "gameStateObj['stars']" in our code.
-    stars = gameStateObj['stars']
+#     # This variable is "syntactic sugar". Typing "stars" is more
+#     # readable than typing "gameStateObj['stars']" in our code.
+#     stars = gameStateObj['stars']
 
-    # The code for handling each of the directions is so similar aside
-    # from adding or subtracting 1 to the x/y coordinates. We can
-    # simplify it by using the xOffset and yOffset variables.
-    if playerMoveTo == UP:
-        xOffset = 0
-        yOffset = -1
-    elif playerMoveTo == RIGHT:
-        xOffset = 1
-        yOffset = 0
-    elif playerMoveTo == DOWN:
-        xOffset = 0
-        yOffset = 1
-    elif playerMoveTo == LEFT:
-        xOffset = -1
-        yOffset = 0
+#     # The code for handling each of the directions is so similar aside
+#     # from adding or subtracting 1 to the x/y coordinates. We can
+#     # simplify it by using the xOffset and yOffset variables.
+#     if playerMoveTo == UP:
+#         xOffset = 0
+#         yOffset = -1
+#     elif playerMoveTo == RIGHT:
+#         xOffset = 1
+#         yOffset = 0
+#     elif playerMoveTo == DOWN:
+#         xOffset = 0
+#         yOffset = 1
+#     elif playerMoveTo == LEFT:
+#         xOffset = -1
+#         yOffset = 0
 
-    # See if the player can move in that direction.
-    if isWall(mapObj, playerx + xOffset, playery + yOffset):
-        return False
-    else:
-        if (playerx + xOffset, playery + yOffset) in stars:
-            # There is a star in the way, see if the player can push it.
-            if not isBlocked(mapObj, gameStateObj, playerx + (xOffset*2), playery + (yOffset*2)):
-                # Move the star.
-                ind = stars.index((playerx + xOffset, playery + yOffset))
-                stars[ind] = (stars[ind][0] + xOffset, stars[ind][1] + yOffset)
-            else:
-                return False
-        # Move the player upwards.
-        gameStateObj['player'] = (playerx + xOffset, playery + yOffset)
-        return True
+#     # See if the player can move in that direction.
+#     if isWall(mapObj, playerx + xOffset, playery + yOffset):
+#         return False
+#     else:
+#         if (playerx + xOffset, playery + yOffset) in stars:
+#             # There is a star in the way, see if the player can push it.
+#             if not isBlocked(mapObj, gameStateObj, playerx + (xOffset*2), playery + (yOffset*2)):
+#                 # Move the star.
+#                 ind = stars.index((playerx + xOffset, playery + yOffset))
+#                 stars[ind] = (stars[ind][0] + xOffset, stars[ind][1] + yOffset)
+#             else:
+#                 return False
+#         # Move the player upwards.
+#         gameStateObj['player'] = (playerx + xOffset, playery + yOffset)
+#         return True
 
 
 def startScreen():

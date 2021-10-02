@@ -861,5 +861,5 @@ if __name__ == "__main__":
     print("State visited: "+ str(STATEVISITED))
     print("Cost: " + str(path.cost))
 
-
+    main()
 #solveHeuristic()

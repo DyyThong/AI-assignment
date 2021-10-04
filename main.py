@@ -35,7 +35,7 @@ LEFT = 'left'
 RIGHT = 'right'
 
 
-def main():
+def main(filename):
     global FPSCLOCK, DISPLAYSURF, IMAGESDICT, TILEMAPPING, OUTSIDEDECOMAPPING, BASICFONT, PLAYERIMAGES, currentImage
 
     # Pygame initialization and basic set up of the global variables.
@@ -88,7 +88,7 @@ def main():
 
     # Read in the levels from the text file. See the readLevelsFile() for
     # details on the format of this file and how to make your own levels.
-    levels = readLevelsFile('test1.txt')
+    levels = readLevelsFile(filename)
     currentLevelIndex = 0
 
     # The main game loop. This loop runs a single level, when the user
@@ -200,8 +200,8 @@ def runLevel(levels, levelNum):
         if playerMoveTo != None and not levelIsComplete:
             # If the player pushed a key to move, make the move
             # (if possible) and push any stars that are pushable.
-            
-            #moved = makeMove(mapObj, gameStateObj, playerMoveTo)
+
+            # moved = makeMove(mapObj, gameStateObj, playerMoveTo)
 
             # if moved:
             #     # increment the step counter.
@@ -322,22 +322,22 @@ def isBlocked(mapObj, gameStateObj, x, y):
 
 
 # def makeMove(mapObj, gameStateObj, playerMoveTo):
-#     """Given a map and game state object, see if it is possible for the
-#     player to make the given move. If it is, then change the player's
-#     position (and the position of any pushed star). If not, do nothing.
+# #     """Given a map and game state object, see if it is possible for the
+# #     player to make the given move. If it is, then change the player's
+# #     position (and the position of any pushed star). If not, do nothing.
 
-#     Returns True if the player moved, otherwise False."""
+# #     Returns True if the player moved, otherwise False."""
 
-#     # Make sure the player can move in the direction they want.
+# #     # Make sure the player can move in the direction they want.
 #     playerx, playery = gameStateObj['player']
 
-#     # This variable is "syntactic sugar". Typing "stars" is more
-#     # readable than typing "gameStateObj['stars']" in our code.
+# #     # This variable is "syntactic sugar". Typing "stars" is more
+# #     # readable than typing "gameStateObj['stars']" in our code.
 #     stars = gameStateObj['stars']
 
-#     # The code for handling each of the directions is so similar aside
-#     # from adding or subtracting 1 to the x/y coordinates. We can
-#     # simplify it by using the xOffset and yOffset variables.
+# #     # The code for handling each of the directions is so similar aside
+# #     # from adding or subtracting 1 to the x/y coordinates. We can
+# #     # simplify it by using the xOffset and yOffset variables.
 #     if playerMoveTo == UP:
 #         xOffset = 0
 #         yOffset = -1
@@ -351,7 +351,7 @@ def isBlocked(mapObj, gameStateObj, x, y):
 #         xOffset = -1
 #         yOffset = 0
 
-#     # See if the player can move in that direction.
+# #     # See if the player can move in that direction.
 #     if isWall(mapObj, playerx + xOffset, playery + yOffset):
 #         return False
 #     else:
@@ -862,5 +862,5 @@ if __name__ == "__main__":
     print("State visited: "+ str(STATEVISITED))
     print("Cost: " + str(path.cost))
 
-    main()
+    main(sys.argv[1])
 #solveHeuristic()

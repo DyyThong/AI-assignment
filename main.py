@@ -1,10 +1,9 @@
-#import sys, pygame
-#from pygame import display
 import queue
 import time
 import datetime
 import random, sys, copy, os, pygame
 from pygame.locals import *
+import psutil
 
 #Code for Graphic
 FPS = 30 # frames per second to update the screen
@@ -862,5 +861,5 @@ if __name__ == "__main__":
     print("State visited: "+ str(STATEVISITED))
     print("Cost: " + str(path.cost))
 
-    main(sys.argv[1])
+    #main(sys.argv[1])
 #solveHeuristic()

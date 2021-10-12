@@ -247,7 +247,7 @@ def solve(pq):
 
 def solveHeuristic():
     return solve(queue.PriorityQueue())
-def solverBlind():
+def solveBlind():
     return solve(queue.Queue())
 
 def printPath(finalState):
@@ -274,7 +274,7 @@ if __name__ == "__main__":
 
     parseLevel(sys.argv[1])
     start = time.time()
-    path = solveHeuristic()
+    path = solveBlind()
     end = time.time()
     print("Time elapsed: " + str(datetime.timedelta(seconds=end - start)))
     print("State created: " + str(STATECREATED))

@@ -8,6 +8,7 @@ import datetime
 #https://baldur.iti.kit.edu/theses/SokobanPortfolio.pdf
 #https://verificationglasses.wordpress.com/2021/01/17/a-star-sokoban-planning/
 #https://home.cse.ust.hk/~yqsong/teaching/comp3211/projects/2017Fall/G14.pdf
+import psutil
 
 WALLS = []
 PLAYER = ()
@@ -276,10 +277,12 @@ if __name__ == "__main__":
     start = time.time()
     path = solveBlind()
     end = time.time()
+    memUsed = psutil.Process().memory_info().rss
     print("Time elapsed: " + str(datetime.timedelta(seconds=end - start)))
     print("State created: " + str(STATECREATED))
     print("State visited: "+ str(STATEVISITED))
     print("Cost: " + str(path.cost))
+    print("Memory: "+ str(memUsed/(1024*1024))+ " MB")
 
 
 #solveHeuristic()

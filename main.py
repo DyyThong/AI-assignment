@@ -35,6 +35,8 @@ LEFT = 'left'
 RIGHT = 'right'
 
 
+
+
 def main(filename):
     global FPSCLOCK, DISPLAYSURF, IMAGESDICT, TILEMAPPING, OUTSIDEDECOMAPPING, BASICFONT, PLAYERIMAGES, currentImage
 
@@ -48,7 +50,7 @@ def main(filename):
     # when pygame.display.update() is called.
     DISPLAYSURF = pygame.display.set_mode((WINWIDTH, WINHEIGHT))
 
-    pygame.display.set_caption('Star Pusher')
+    pygame.display.set_caption('Sokoban')
     BASICFONT = pygame.font.Font('freesansbold.ttf', 18)
 
     # A global dict value that will contain all the Pygame
@@ -81,10 +83,11 @@ def main(filename):
 
     # PLAYERIMAGES is a list of all possible characters the player can be.
     # currentImage is the index of the player's current player image.
+    
     currentImage = 0
     PLAYERIMAGES = [IMAGESDICT['boy']]
 
-    startScreen() # show the title screen until the user presses a key
+    # startScreen() # show the title screen until the user presses a key
 
     # Read in the levels from the text file. See the readLevelsFile() for
     # details on the format of this file and how to make your own levels.
@@ -93,24 +96,25 @@ def main(filename):
 
     # The main game loop. This loop runs a single level, when the user
     # finishes that level, the next/previous level is loaded.
-    while True: # main game loop
+    # while True: # main game loop
         # Run the level to actually start playing the game:
-        result = runLevel(levels, currentLevelIndex)
+    # result = runLevel(levels, currentLevelIndex)
+    runLevel(levels, currentLevelIndex)
 
-        if result in ('solved', 'next'):
-            # Go to the next level.
-            currentLevelIndex += 1
-            if currentLevelIndex >= len(levels):
-                # If there are no more levels, go back to the first one.
-                currentLevelIndex = 0
-        elif result == 'back':
-            # Go to the previous level.
-            currentLevelIndex -= 1
-            if currentLevelIndex < 0:
-                # If there are no previous levels, go to the last one.
-                currentLevelIndex = len(levels)-1
-        elif result == 'reset':
-            pass # Do nothing. Loop re-calls runLevel() to reset the level
+        # if result in ('solved', 'next'):
+        #     # Go to the next level.
+        #     currentLevelIndex += 1
+        #     if currentLevelIndex >= len(levels):
+        #         # If there are no more levels, go back to the first one.
+        #         currentLevelIndex = 0
+        # elif result == 'back':
+        #     # Go to the previous level.
+        #     currentLevelIndex -= 1
+        #     if currentLevelIndex < 0:
+        #         # If there are no previous levels, go to the last one.
+        #         currentLevelIndex = len(levels)-1
+        # elif result == 'reset':
+        #     pass # Do nothing. Loop re-calls runLevel() to reset the level
 
 
 def runLevel(levels, levelNum):
@@ -169,15 +173,15 @@ def runLevel(levels, levelNum):
                 elif event.key == K_s:
                     cameraDown = True
 
-                elif event.key == K_n:
-                    return 'next'
-                elif event.key == K_b:
-                    return 'back'
+                # elif event.key == K_n:
+                #     return 'next'
+                # elif event.key == K_b:
+                #     return 'back'
 
                 elif event.key == K_ESCAPE:
                     terminate() # Esc key quits.
-                elif event.key == K_BACKSPACE:
-                    return 'reset' # Reset the level.
+                # elif event.key == K_BACKSPACE:
+                #     return 'reset' # Reset the level.
                 elif event.key == K_p:
                     # Change the player image to the next one.
                     currentImage += 1
@@ -201,12 +205,12 @@ def runLevel(levels, levelNum):
             # If the player pushed a key to move, make the move
             # (if possible) and push any stars that are pushable.
 
-            # moved = makeMove(mapObj, gameStateObj, playerMoveTo)
+            moved = makeMove(mapObj, gameStateObj, playerMoveTo)
 
-            # if moved:
-            #     # increment the step counter.
-            #     gameStateObj['stepCounter'] += 1
-            #     mapNeedsRedraw = True
+            if moved:
+                # increment the step counter.
+                gameStateObj['stepCounter'] += 1
+                mapNeedsRedraw = True
 
             if isLevelFinished(levelObj, gameStateObj):
                 # level is solved, we should show the "Solved!" image.
@@ -321,99 +325,99 @@ def isBlocked(mapObj, gameStateObj, x, y):
     return False
 
 
-# def makeMove(mapObj, gameStateObj, playerMoveTo):
-# #     """Given a map and game state object, see if it is possible for the
-# #     player to make the given move. If it is, then change the player's
-# #     position (and the position of any pushed star). If not, do nothing.
+def makeMove(mapObj, gameStateObj, playerMoveTo):
+    """Given a map and game state object, see if it is possible for the
+    player to make the given move. If it is, then change the player's
+    position (and the position of any pushed star). If not, do nothing.
 
-# #     Returns True if the player moved, otherwise False."""
+    Returns True if the player moved, otherwise False."""
 
-# #     # Make sure the player can move in the direction they want.
-#     playerx, playery = gameStateObj['player']
+    # Make sure the player can move in the direction they want.
+    playerx, playery = gameStateObj['player']
 
-# #     # This variable is "syntactic sugar". Typing "stars" is more
-# #     # readable than typing "gameStateObj['stars']" in our code.
-#     stars = gameStateObj['stars']
+    # This variable is "syntactic sugar". Typing "stars" is more
+    # readable than typing "gameStateObj['stars']" in our code.
+    stars = gameStateObj['stars']
 
-# #     # The code for handling each of the directions is so similar aside
-# #     # from adding or subtracting 1 to the x/y coordinates. We can
-# #     # simplify it by using the xOffset and yOffset variables.
-#     if playerMoveTo == UP:
-#         xOffset = 0
-#         yOffset = -1
-#     elif playerMoveTo == RIGHT:
-#         xOffset = 1
-#         yOffset = 0
-#     elif playerMoveTo == DOWN:
-#         xOffset = 0
-#         yOffset = 1
-#     elif playerMoveTo == LEFT:
-#         xOffset = -1
-#         yOffset = 0
+    # The code for handling each of the directions is so similar aside
+    # from adding or subtracting 1 to the x/y coordinates. We can
+    # simplify it by using the xOffset and yOffset variables.
+    if playerMoveTo == UP:
+        xOffset = 0
+        yOffset = -1
+    elif playerMoveTo == RIGHT:
+        xOffset = 1
+        yOffset = 0
+    elif playerMoveTo == DOWN:
+        xOffset = 0
+        yOffset = 1
+    elif playerMoveTo == LEFT:
+        xOffset = -1
+        yOffset = 0
 
-# #     # See if the player can move in that direction.
-#     if isWall(mapObj, playerx + xOffset, playery + yOffset):
-#         return False
-#     else:
-#         if (playerx + xOffset, playery + yOffset) in stars:
-#             # There is a star in the way, see if the player can push it.
-#             if not isBlocked(mapObj, gameStateObj, playerx + (xOffset*2), playery + (yOffset*2)):
-#                 # Move the star.
-#                 ind = stars.index((playerx + xOffset, playery + yOffset))
-#                 stars[ind] = (stars[ind][0] + xOffset, stars[ind][1] + yOffset)
-#             else:
-#                 return False
-#         # Move the player upwards.
-#         gameStateObj['player'] = (playerx + xOffset, playery + yOffset)
-#         return True
+    # See if the player can move in that direction.
+    if isWall(mapObj, playerx + xOffset, playery + yOffset):
+        return False
+    else:
+        if (playerx + xOffset, playery + yOffset) in stars:
+            # There is a star in the way, see if the player can push it.
+            if not isBlocked(mapObj, gameStateObj, playerx + (xOffset*2), playery + (yOffset*2)):
+                # Move the star.
+                ind = stars.index((playerx + xOffset, playery + yOffset))
+                stars[ind] = (stars[ind][0] + xOffset, stars[ind][1] + yOffset)
+            else:
+                return False
+        # Move the player upwards.
+        gameStateObj['player'] = (playerx + xOffset, playery + yOffset)
+        return True
 
 
-def startScreen():
-    """Display the start screen (which has the title and instructions)
-    until the player presses a key. Returns None."""
+# def startScreen():
+#     """Display the start screen (which has the title and instructions)
+#     until the player presses a key. Returns None."""
 
-    # Position the title image.
-    titleRect = IMAGESDICT['title'].get_rect()
-    topCoord = 50 # topCoord tracks where to position the top of the text
-    titleRect.top = topCoord
-    titleRect.centerx = HALF_WINWIDTH
-    topCoord += titleRect.height
+#     # Position the title image.
+#     titleRect = IMAGESDICT['title'].get_rect()
+#     topCoord = 50 # topCoord tracks where to position the top of the text
+#     titleRect.top = topCoord
+#     titleRect.centerx = HALF_WINWIDTH
+#     topCoord += titleRect.height
 
-    # Unfortunately, Pygame's font & text system only shows one line at
-    # a time, so we can't use strings with \n newline characters in them.
-    # So we will use a list with each line in it.
-    instructionText = ['Push the stars over the marks.',
-                       'Backspace to reset level, Esc to quit.',
-                       'N for next level, B to go back a level.']
+#     # Unfortunately, Pygame's font & text system only shows one line at
+#     # a time, so we can't use strings with \n newline characters in them.
+#     # So we will use a list with each line in it.
+#     instructionText = ['Push the stars over the marks.',
+#                        'Backspace to reset level, Esc to quit.',
+#                        'N for next level, B to go back a level.']
 
-    # Start with drawing a blank color to the entire window:
-    DISPLAYSURF.fill(BGCOLOR)
+#     # Start with drawing a blank color to the entire window:
+#     DISPLAYSURF.fill(BGCOLOR)
 
-    # Draw the title image to the window:
-    DISPLAYSURF.blit(IMAGESDICT['title'], titleRect)
+#     # Draw the title image to the window:
+#     DISPLAYSURF.blit(IMAGESDICT['title'], titleRect)
 
-    # Position and draw the text.
-    for i in range(len(instructionText)):
-        instSurf = BASICFONT.render(instructionText[i], 1, TEXTCOLOR)
-        instRect = instSurf.get_rect()
-        topCoord += 10 # 10 pixels will go in between each line of text.
-        instRect.top = topCoord
-        instRect.centerx = HALF_WINWIDTH
-        topCoord += instRect.height # Adjust for the height of the line.
-        DISPLAYSURF.blit(instSurf, instRect)
+#     # Position and draw the text.
+#     for i in range(len(instructionText)):
+#         instSurf = BASICFONT.render(instructionText[i], 1, TEXTCOLOR)
+#         instRect = instSurf.get_rect()
+#         topCoord += 10 # 10 pixels will go in between each line of text.
+#         instRect.top = topCoord
+#         instRect.centerx = HALF_WINWIDTH
+#         topCoord += instRect.height # Adjust for the height of the line.
+#         DISPLAYSURF.blit(instSurf, instRect)
 
-    while True: # Main loop for the start screen.
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                terminate()
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    terminate()
-                return # user has pressed a key, so return.
+#     while True: # Main loop for the start screen.
+#         for event in pygame.event.get():
+#             if event.type == QUIT:
+#                 terminate()
+#             elif event.type == KEYDOWN:
+#                 if event.key == K_ESCAPE:
+#                     terminate()
+#                 return # user has pressed a key, so return.
 
-        # Display the DISPLAYSURF contents to the actual screen.
-        pygame.display.update()
-        FPSCLOCK.tick()
+#         # Display the DISPLAYSURF contents to the actual screen.
+#         pygame.display.update()
+#         FPSCLOCK.tick()
 
 
 def readLevelsFile(filename):

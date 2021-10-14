@@ -189,7 +189,6 @@ def runLevel(levels, levelNum):
         # Draw mapSurf to the DISPLAYSURF Surface object.
         DISPLAYSURF.blit(mapSurf, mapSurfRect)
 
-        # DISPLAYSURF.blit(levelSurf, levelRect)
         stepSurf = BASICFONT.render('Steps: %s' % (gameStateObj['stepCounter']), 1, TEXTCOLOR)
         stepRect = stepSurf.get_rect()
         stepRect.bottomleft = (20, WINHEIGHT - 10)
@@ -439,10 +438,6 @@ def isLevelFinished(levelObj, gameStateObj):
             return False
     return True
 
-
-# https://baldur.iti.kit.edu/theses/SokobanPortfolio.pdf
-# https://verificationglasses.wordpress.com/2021/01/17/a-star-sokoban-planning/
-# https://home.cse.ust.hk/~yqsong/teaching/comp3211/projects/2017Fall/G14.pdf
 
 # Code for Algorimth
 WALLS = []
@@ -747,4 +742,3 @@ if __name__ == "__main__":
     print("Cost: " + str(path.cost))
     print("Memory: "+ str(memUsed/(1024*1024))+ " MB")
 
-# solveHeuristic()

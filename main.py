@@ -785,13 +785,9 @@ def printPath(finalState):
         temp.insert(0,temp1[0])
         
         state = state.prevState
-    # print(playerpos[0])
-    # print(playerpos[1])
-    # print(playerpos[2])
-    # print(playerpos[3])
+
     boxst = [(sub[1], sub[0]) for sub in temp]
-    # print(temp)
-    # print(boxst)
+
 
 
 

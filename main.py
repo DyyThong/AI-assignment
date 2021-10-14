@@ -764,11 +764,13 @@ if __name__ == "__main__":
     path = solveBlind()
     end = time.time()
     memUsed = psutil.Process().memory_info().rss
+    main(sys.argv[1])
+
+
     print("Time elapsed: " + str(datetime.timedelta(seconds=end - start)))
     print("State created: " + str(STATECREATED))
     print("State visited: "+ str(STATEVISITED))
     print("Cost: " + str(path.cost))
     print("Memory: "+ str(memUsed/(1024*1024))+ " MB")
 
-    main(sys.argv[1])
 # solveHeuristic()

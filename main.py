@@ -75,30 +75,12 @@ def main(filename):
     currentState = 0
     PLAYERIMAGES = [IMAGESDICT['boy']]
 
-    # startScreen() # show the title screen until the user presses a key
 
     levels = readLevelsFile(filename)
     currentLevelIndex = 0
 
-    # while True: # main game loop
-    # Run the level to actually start playing the game:
-    # result = runLevel(levels, currentLevelIndex)
     runLevel(levels, currentLevelIndex)
 
-    # if result in ('solved', 'next'):
-    #     # Go to the next level.
-    #     currentLevelIndex += 1
-    #     if currentLevelIndex >= len(levels):
-    #         # If there are no more levels, go back to the first one.
-    #         currentLevelIndex = 0
-    # elif result == 'back':
-    #     # Go to the previous level.
-    #     currentLevelIndex -= 1
-    #     if currentLevelIndex < 0:
-    #         # If there are no previous levels, go to the last one.
-    #         currentLevelIndex = len(levels)-1
-    # elif result == 'reset':
-    #     pass # Do nothing. Loop re-calls runLevel() to reset the level
 
 
 def runLevel(levels, levelNum):
@@ -107,9 +89,6 @@ def runLevel(levels, levelNum):
     mapObj = decorateMap(levelObj['mapObj'], levelObj['startState']['player'])
     gameStateObj = copy.deepcopy(levelObj['startState'])
     mapNeedsRedraw = True  # set to True to call drawMap()
-    # levelSurf = BASICFONT.render('Level %s of %s' % (levelNum + 1, len(levels)), 1, TEXTCOLOR)
-    # levelRect = levelSurf.get_rect()
-    # levelRect.bottomleft = (20, WINHEIGHT - 35)
     mapWidth = len(mapObj) * TILEWIDTH
     mapHeight = (len(mapObj[0]) - 1) * TILEFLOORHEIGHT + TILEHEIGHT
     MAX_CAM_X_PAN = abs(HALF_WINHEIGHT - int(mapHeight / 2)) + TILEWIDTH
@@ -154,8 +133,7 @@ def runLevel(levels, levelNum):
 
                 elif event.key == K_ESCAPE:
                     terminate()  # Esc key quits.
-                # elif event.key == K_BACKSPACE:
-                #     return 'reset' # Reset the level.
+
                 elif event.key == K_p:
                     # Change the player image to the next one.
                     currentImage += 1
@@ -325,10 +303,6 @@ def readLevelsFile(filename):
     for lineNum in range(len(content)):
         # Process each line that was in the level file.
         line = content[lineNum].rstrip('\r\n')
-
-        # if ';' in line:
-        #     # Ignore the ; lines, they're comments in the level file.
-        #     line = line[:line.find(';')]
 
         if line != '':
             # This line is part of the map.

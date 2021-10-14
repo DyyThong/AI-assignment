@@ -39,7 +39,7 @@ RIGHT = 'right'
 
 def main(filename):
     global FPSCLOCK, DISPLAYSURF, IMAGESDICT, TILEMAPPING, OUTSIDEDECOMAPPING, BASICFONT, PLAYERIMAGES, currentImage
-
+    global currentState
     # Pygame initialization and basic set up of the global variables.
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -85,6 +85,7 @@ def main(filename):
     # currentImage is the index of the player's current player image.
     
     currentImage = 0
+    currentState = 0
     PLAYERIMAGES = [IMAGESDICT['boy']]
 
     # startScreen() # show the title screen until the user presses a key
@@ -118,7 +119,7 @@ def main(filename):
 
 
 def runLevel(levels, levelNum):
-    global currentImage
+    global currentImage, currentState
     levelObj = levels[levelNum]
     mapObj = decorateMap(levelObj['mapObj'], levelObj['startState']['player'])
     gameStateObj = copy.deepcopy(levelObj['startState'])
@@ -143,7 +144,7 @@ def runLevel(levels, levelNum):
 
     while True: # main game loop
         # Reset these variables:
-        playerMoveTo = None
+        playerMove = False
         keyPressed = False
 
         for event in pygame.event.get(): # event handling loop
@@ -154,14 +155,9 @@ def runLevel(levels, levelNum):
             elif event.type == KEYDOWN:
                 # Handle key presses
                 keyPressed = True
-                if event.key == K_LEFT:
-                    playerMoveTo = LEFT
-                elif event.key == K_RIGHT:
-                    playerMoveTo = RIGHT
-                elif event.key == K_UP:
-                    playerMoveTo = UP
-                elif event.key == K_DOWN:
-                    playerMoveTo = DOWN
+                if event.key == K_RIGHT:
+                    currentState += 1
+                    playerMove = True
 
                 # Set the camera move mode.
                 elif event.key == K_a:
@@ -201,11 +197,11 @@ def runLevel(levels, levelNum):
                 elif event.key == K_s:
                     cameraDown = False
 
-        if playerMoveTo != None and not levelIsComplete:
+        if playerMove != False and not levelIsComplete:
             # If the player pushed a key to move, make the move
             # (if possible) and push any stars that are pushable.
 
-            moved = makeMove(mapObj, gameStateObj, playerMoveTo)
+            moved = makeMove(mapObj, gameStateObj, playerMove)
 
             if moved:
                 # increment the step counter.
@@ -342,18 +338,9 @@ def makeMove(mapObj, gameStateObj, playerMoveTo):
     # The code for handling each of the directions is so similar aside
     # from adding or subtracting 1 to the x/y coordinates. We can
     # simplify it by using the xOffset and yOffset variables.
-    if playerMoveTo == UP:
-        xOffset = 0
-        yOffset = -1
-    elif playerMoveTo == RIGHT:
-        xOffset = 1
-        yOffset = 0
-    elif playerMoveTo == DOWN:
-        xOffset = 0
-        yOffset = 1
-    elif playerMoveTo == LEFT:
-        xOffset = -1
-        yOffset = 0
+    if playerMoveTo == True:
+        xOffset = playerpos[currentState][1] - playerpos[currentState-1][1]
+        yOffset = playerpos[currentState][0] - playerpos[currentState-1][0]
 
     # See if the player can move in that direction.
     if isWall(mapObj, playerx + xOffset, playery + yOffset):
@@ -435,9 +422,9 @@ def readLevelsFile(filename):
         # Process each line that was in the level file.
         line = content[lineNum].rstrip('\r\n')
 
-        if ';' in line:
-            # Ignore the ; lines, they're comments in the level file.
-            line = line[:line.find(';')]
+        # if ';' in line:
+        #     # Ignore the ; lines, they're comments in the level file.
+        #     line = line[:line.find(';')]
 
         if line != '':
             # This line is part of the map.
@@ -829,25 +816,41 @@ def solve(pq):
     return None
 
 def solveHeuristic():
+    state = solve(queue.PriorityQueue())
+    if (state != None):
+        printPath(state)
     return solve(queue.PriorityQueue())
 def solverBlind():
+    state = solve(queue.Queue())
+    if (state != None):
+        printPath(state)
     return solve(queue.Queue())
 
+#Trans for graphic
+playerpos = []
+boxst = []
+
 def printPath(finalState):
+
+    global boxst, playerpos
+    temp = []
     state = finalState
     while (state != None):
-        print(state)
-        print("___________________________________________")
+        playerpos.insert(0,state.player)
+        temp1 = state.boxes
+        temp.insert(0,temp1[0])
+        
         state = state.prevState
+    # print(playerpos[0])
+    # print(playerpos[1])
+    # print(playerpos[2])
+    # print(playerpos[3])
+    boxst = [(sub[1], sub[0]) for sub in temp]
+    # print(temp)
+    # print(boxst)
 
-# Initialize the pygame
-#pygame.init()
 
-# Create the screen
-#screen = display.set_mode((800, 600))
 
-#while True:
-#    pass
 def terminate():
     pygame.quit()
     sys.exit()

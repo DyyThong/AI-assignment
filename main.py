@@ -1,5 +1,3 @@
-#import sys, pygame
-#from pygame import display
 import queue
 import time
 import datetime
@@ -40,21 +38,16 @@ RIGHT = 'right'
 def main(filename):
     global FPSCLOCK, DISPLAYSURF, IMAGESDICT, TILEMAPPING, OUTSIDEDECOMAPPING, BASICFONT, PLAYERIMAGES, currentImage
     global currentState
-    # Pygame initialization and basic set up of the global variables.
+    
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
 
-    # Because the Surface object stored in DISPLAYSURF was returned
-    # from the pygame.display.set_mode() function, this is the
-    # Surface object that is drawn to the actual computer screen
-    # when pygame.display.update() is called.
+    
     DISPLAYSURF = pygame.display.set_mode((WINWIDTH, WINHEIGHT))
 
     pygame.display.set_caption('Sokoban')
     BASICFONT = pygame.font.Font('freesansbold.ttf', 18)
 
-    # A global dict value that will contain all the Pygame
-    # Surface objects returned by pygame.image.load().
     IMAGESDICT = {'uncovered goal': pygame.image.load('RedSelector.png'),
                   'covered goal': pygame.image.load('Selector.png'),
                   'star': pygame.image.load('Star.png'),
@@ -70,8 +63,6 @@ def main(filename):
                   'tall tree': pygame.image.load('Tree_Tall.png'),
                   'ugly tree': pygame.image.load('Tree_Ugly.png')}
 
-    # These dict values are global, and map the character that appears
-    # in the level file to the Surface object it represents.
     TILEMAPPING = {'x': IMAGESDICT['corner'],
                    '#': IMAGESDICT['wall'],
                    'o': IMAGESDICT['inside floor'],
@@ -80,9 +71,6 @@ def main(filename):
                           '2': IMAGESDICT['short tree'],
                           '3': IMAGESDICT['tall tree'],
                           '4': IMAGESDICT['ugly tree']}
-
-    # PLAYERIMAGES is a list of all possible characters the player can be.
-    # currentImage is the index of the player's current player image.
     
     currentImage = 0
     currentState = 0
@@ -90,13 +78,9 @@ def main(filename):
 
     # startScreen() # show the title screen until the user presses a key
 
-    # Read in the levels from the text file. See the readLevelsFile() for
-    # details on the format of this file and how to make your own levels.
     levels = readLevelsFile(filename)
     currentLevelIndex = 0
 
-    # The main game loop. This loop runs a single level, when the user
-    # finishes that level, the next/previous level is loaded.
     # while True: # main game loop
         # Run the level to actually start playing the game:
     # result = runLevel(levels, currentLevelIndex)
@@ -124,9 +108,9 @@ def runLevel(levels, levelNum):
     mapObj = decorateMap(levelObj['mapObj'], levelObj['startState']['player'])
     gameStateObj = copy.deepcopy(levelObj['startState'])
     mapNeedsRedraw = True # set to True to call drawMap()
-    levelSurf = BASICFONT.render('Level %s of %s' % (levelNum + 1, len(levels)), 1, TEXTCOLOR)
-    levelRect = levelSurf.get_rect()
-    levelRect.bottomleft = (20, WINHEIGHT - 35)
+    # levelSurf = BASICFONT.render('Level %s of %s' % (levelNum + 1, len(levels)), 1, TEXTCOLOR)
+    # levelRect = levelSurf.get_rect()
+    # levelRect.bottomleft = (20, WINHEIGHT - 35)
     mapWidth = len(mapObj) * TILEWIDTH
     mapHeight = (len(mapObj[0]) - 1) * TILEFLOORHEIGHT + TILEHEIGHT
     MAX_CAM_X_PAN = abs(HALF_WINHEIGHT - int(mapHeight / 2)) + TILEWIDTH
@@ -169,11 +153,6 @@ def runLevel(levels, levelNum):
                 elif event.key == K_s:
                     cameraDown = True
 
-                # elif event.key == K_n:
-                #     return 'next'
-                # elif event.key == K_b:
-                #     return 'back'
-
                 elif event.key == K_ESCAPE:
                     terminate() # Esc key quits.
                 # elif event.key == K_BACKSPACE:
@@ -198,9 +177,7 @@ def runLevel(levels, levelNum):
                     cameraDown = False
 
         if playerMove != False and not levelIsComplete:
-            # If the player pushed a key to move, make the move
-            # (if possible) and push any stars that are pushable.
-
+    
             moved = makeMove(mapObj, gameStateObj, playerMove)
 
             if moved:
@@ -235,7 +212,7 @@ def runLevel(levels, levelNum):
         # Draw mapSurf to the DISPLAYSURF Surface object.
         DISPLAYSURF.blit(mapSurf, mapSurfRect)
 
-        DISPLAYSURF.blit(levelSurf, levelRect)
+        # DISPLAYSURF.blit(levelSurf, levelRect)
         stepSurf = BASICFONT.render('Steps: %s' % (gameStateObj['stepCounter']), 1, TEXTCOLOR)
         stepRect = stepSurf.get_rect()
         stepRect.bottomleft = (20, WINHEIGHT - 10)
@@ -266,13 +243,6 @@ def isWall(mapObj, x, y):
 
 
 def decorateMap(mapObj, startxy):
-    """Makes a copy of the given map object and modifies it.
-    Here is what is done to it:
-        * Walls that are corners are turned into corner pieces.
-        * The outside/inside floor tile distinction is made.
-        * Tree/rock decorations are randomly added to the outside tiles.
-
-    Returns the decorated map object."""
 
     startx, starty = startxy # Syntactic sugar
 
@@ -306,8 +276,6 @@ def decorateMap(mapObj, startxy):
 
 
 def isBlocked(mapObj, gameStateObj, x, y):
-    """Returns True if the (x, y) position on the map is
-    blocked by a wall or star, otherwise return False."""
 
     if isWall(mapObj, x, y):
         return True
@@ -322,22 +290,11 @@ def isBlocked(mapObj, gameStateObj, x, y):
 
 
 def makeMove(mapObj, gameStateObj, playerMoveTo):
-    """Given a map and game state object, see if it is possible for the
-    player to make the given move. If it is, then change the player's
-    position (and the position of any pushed star). If not, do nothing.
 
-    Returns True if the player moved, otherwise False."""
-
-    # Make sure the player can move in the direction they want.
     playerx, playery = gameStateObj['player']
 
-    # This variable is "syntactic sugar". Typing "stars" is more
-    # readable than typing "gameStateObj['stars']" in our code.
     stars = gameStateObj['stars']
 
-    # The code for handling each of the directions is so similar aside
-    # from adding or subtracting 1 to the x/y coordinates. We can
-    # simplify it by using the xOffset and yOffset variables.
     if playerMoveTo == True:
         xOffset = playerpos[currentState][1] - playerpos[currentState-1][1]
         yOffset = playerpos[currentState][0] - playerpos[currentState-1][0]
@@ -495,14 +452,7 @@ def readLevelsFile(filename):
 
 
 def floodFill(mapObj, x, y, oldCharacter, newCharacter):
-    """Changes any values matching oldCharacter on the map object to
-    newCharacter at the (x, y) position, and does the same for the
-    positions to the left, right, down, and up of (x, y), recursively."""
 
-    # In this game, the flood fill algorithm creates the inside/outside
-    # floor distinction. This is a "recursive" function.
-    # For more info on the Flood Fill algorithm, see:
-    #   http://en.wikipedia.org/wiki/Flood_fill
     if mapObj[x][y] == oldCharacter:
         mapObj[x][y] = newCharacter
 
@@ -517,13 +467,7 @@ def floodFill(mapObj, x, y, oldCharacter, newCharacter):
 
 
 def drawMap(mapObj, gameStateObj, goals):
-    """Draws the map to a Surface object, including the player and
-    stars. This function does not call pygame.display.update(), nor
-    does it draw the "Level" and "Steps" text in the corner."""
 
-    # mapSurf will be the single Surface object that the tiles are drawn
-    # on, so that it is easy to position the entire map on the DISPLAYSURF
-    # Surface object. First, the width and height must be calculated.
     mapSurfWidth = len(mapObj) * TILEWIDTH
     mapSurfHeight = (len(mapObj[0]) - 1) * TILEFLOORHEIGHT + TILEHEIGHT
     mapSurf = pygame.Surface((mapSurfWidth, mapSurfHeight))

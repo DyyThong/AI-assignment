@@ -35,7 +35,7 @@ LEFT = 'left'
 RIGHT = 'right'
 
 
-def main(filename):
+def display(filename):
     global FPSCLOCK, DISPLAYSURF, IMAGESDICT, TILEMAPPING, OUTSIDEDECOMAPPING, BASICFONT, PLAYERIMAGES, currentImage
     global currentState
 
@@ -733,7 +733,7 @@ if __name__ == "__main__":
     path = solveBlind()
     end = time.time()
     memUsed = psutil.Process().memory_info().rss
-    main(sys.argv[1])
+    display(sys.argv[1])
 
 
     print("Time elapsed: " + str(datetime.timedelta(seconds=end - start)))
